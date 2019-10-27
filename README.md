@@ -23,3 +23,6 @@ sudo systemctl start gitea
 ```
 sudo systemctl enable gitea
 ```
+
+## Uninstalling
+`gitea-uninstall.sh` will undo/remove everything `gitea-install.sh` does.

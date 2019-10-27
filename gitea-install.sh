@@ -206,4 +206,4 @@ fi
 
 # The end
 debugecho 'the end'
-exit 1
+exit 0
