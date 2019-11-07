@@ -147,7 +147,13 @@ else
   if [[ "${GITEA_LATEST_VERSION_BIN_SHA256SUM}" == "${GITEA_LATEST_VERSION_SHA256SUM}" ]]; then
     if [[ ${GITEA_INSTALLED} -eq 1 ]]; then
       logmessage "about to install new version of gitea, version ${GITEA_LATEST_VERSION}, going to take a backup first"
-      /usr/local/bin/gitea dump -c /etc/gitea/app.ini
+      su - gitea -c '/usr/local/bin/gitea dump -c /etc/gitea/app.ini'
+    fi
+
+    # Stop gitea if running
+    if systemctl is-active --quiet gitea; then
+      debugecho "stopping gitea"
+      systemctl stop gitea
     fi
 
     logmessage "installing gitea version ${GITEA_LATEST_VERSION}"
@@ -191,7 +197,6 @@ WantedBy=multi-user.target' > /etc/systemd/system/gitea.service
 	chmod 644 /etc/systemd/system/gitea.service
 	systemctl daemon-reload >> /dev/null 2>&1
 	systemctl enable gitea >> /dev/null 2>&1
-	systemctl start gitea >> /dev/null 2>&1
 fi
 
 # Let users know they need to change permissions after running the first time web configuration
@@ -203,6 +208,9 @@ else
 	sudo chmod 750 /etc/gitea
 	sudo chmod 640 /etc/gitea/app.ini'
 fi
+
+# Start Gitea
+systemctl start gitea >> /dev/null 2>&1
 
 # The end
 debugecho 'the end'
