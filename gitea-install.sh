@@ -58,11 +58,11 @@ if id gitea >> /dev/null 2>&1; then
   debugecho "gitea user already exists"
 else
   debugecho "creating gitea user"
-  adduser --system --shell /bin/bash --comment 'Gitea Version Control' --user-group --home-dir /home/gitea gitea
+  adduser --system --shell /bin/bash --comment 'Gitea Version Control' --user-group --create-home --home-dir /home/gitea gitea
 fi
 
 # Install git, its required for Gitea
-if rpm -qa git >> /dev/null 2>&1; then
+if rpm -qa git | grep -q git >> /dev/null 2>&1; then
 	debugecho "git already installed"
 else
 	debugecho "installing git"
