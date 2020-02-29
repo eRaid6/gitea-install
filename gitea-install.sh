@@ -116,7 +116,7 @@ fi
 
 # Download latest version of Gitea and install
 # https://docs.gitea.io/en-us/install-from-binary/
-GITEA_LATEST_VERSION=$(curl -s https://dl.gitea.io/gitea/ | grep '<a href\=\"\/gitea' | cut -d"/" -f3 | tail -n 5 | sort -n | tail -n 1)
+GITEA_LATEST_VERSION=$(curl -s https://dl.gitea.io/gitea/ | grep '<a href\=\"\/gitea' | cut -d"/" -f3 | grep '[[:digit:]]' | sort -V | tail -n 1)
 cd /tmp >> /dev/null 2>&1
 rm gitea gitea.sha256 >> /dev/null 2>&1
 # download signature
