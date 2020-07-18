@@ -116,12 +116,12 @@ fi
 
 # Download latest version of Gitea and install
 # https://docs.gitea.io/en-us/install-from-binary/
-GITEA_LATEST_VERSION=$(curl -s https://dl.gitea.io/gitea/ | grep '<a href\=\"\/gitea' | cut -d"/" -f3 | grep '[[:digit:]]' | sort -V | tail -n 1)
+GITEA_LATEST_VERSION=$(curl -s https://dl.gitea.io/gitea/ | grep '<a href\=\"\/gitea' | cut -d"/" -f3 | cut -d '"' -f1 | grep '[[:digit:]]' | sort -V | tail -n 1)
 cd /tmp >> /dev/null 2>&1
 rm gitea gitea.sha256 >> /dev/null 2>&1
 # download signature
 debugecho 'downloading gitea.sha256 signature'
-wget -O gitea.sha256 https://dl.gitea.io/gitea/${GITEA_LATEST_VERSION}/gitea-${GITEA_LATEST_VERSION}-linux-amd64.sha256 >> /dev/null 2>&1
+curl --output gitea.sha256 https://dl.gitea.io/gitea/${GITEA_LATEST_VERSION}/gitea-${GITEA_LATEST_VERSION}-linux-amd64.sha256 >> /dev/null 2>&1
 GITEA_LATEST_VERSION_SHA256SUM=$(cut -d' ' -f1 gitea.sha256 | tr -d '\040\011\012\015')
 debugecho "GITEA_LATEST_VERSION_SHA256SUM=${GITEA_LATEST_VERSION_SHA256SUM}"
 # check to see if we need to update
@@ -141,7 +141,7 @@ if [[ "${GITEA_CURRENT_VERSION_BIN_SHA256SUM}" == "${GITEA_LATEST_VERSION_SHA256
 else
   debugecho 'downloading gitea binary, this will take a little bit'
   # download binary
-  wget -O gitea https://dl.gitea.io/gitea/${GITEA_LATEST_VERSION}/gitea-${GITEA_LATEST_VERSION}-linux-amd64 >> /dev/null 2>&1
+  curl --output gitea https://dl.gitea.io/gitea/${GITEA_LATEST_VERSION}/gitea-${GITEA_LATEST_VERSION}-linux-amd64 >> /dev/null 2>&1
   # validate download
   GITEA_LATEST_VERSION_BIN_SHA256SUM=$(sha256sum gitea | cut -d' ' -f1 | tr -d '\040\011\012\015')
   if [[ "${GITEA_LATEST_VERSION_BIN_SHA256SUM}" == "${GITEA_LATEST_VERSION_SHA256SUM}" ]]; then
@@ -159,6 +159,7 @@ else
     logmessage "installing gitea version ${GITEA_LATEST_VERSION}"
     mv gitea /usr/local/bin/gitea >> /dev/null 2>&1
     chmod 777 /usr/local/bin/gitea >> /dev/null 2>&1
+    restorecon /usr/local/bin/gitea >> /dev/null 2>&1
     rm gitea.sha256 >> /dev/null 2>&1
   else
     logmessage "gitea download binary sha256sum of ${GITEA_LATEST_VERSION_BIN_SHA256SUM} does not match expected ${GITEA_LATEST_VERSION_SHA256SUM}, not installing"
