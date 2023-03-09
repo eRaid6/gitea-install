@@ -22,23 +22,26 @@ function debugecho() {
 
 # Help/usage
 function usage() {
-	echo "usage: ${PROG_NAME} -v"
+	echo "usage: ${PROG_NAME} -p 1.18.5 -v"
 	exit 1
 }
 
 # Command line options
-while getopts "hv" o 2>/dev/null; do                                            
+while getopts "hvp:" o 2>/dev/null; do
     case "${o}" in                                                              
-        v)                                                                      
-            VERBOSE=1                                                           
-            ;;                                                                  
-        h)                                                                      
-            usage                                                               
-            ;;                                                                  
-        *)                                                                      
-            usage                                                               
-            ;;                                                                  
-    esac                                                                        
+        p)
+            GITEA_LATEST_VERSION="${OPTARG}"
+            ;;
+        v)
+            VERBOSE=1
+            ;;
+        h)
+            usage
+            ;;
+        *)
+            usage
+            ;;
+    esac
 done
 
 # Check current user permissions
@@ -116,7 +119,11 @@ fi
 
 # Download latest version of Gitea and install
 # https://docs.gitea.io/en-us/install-from-binary/
-GITEA_LATEST_VERSION=$(curl -L -s https://dl.gitea.io/gitea/ | grep '<a href\=\"\/gitea' | cut -d"/" -f3 | grep 'Current Release' | cut -d '"' -f1 | grep '[[:digit:]]' | sort -V | tail -n 1)
+if [[ -n $GITEA_LATEST_VERSION ]]; then
+  debugecho "${GITEA_LATEST_VERSION} specified on command line", not autodetecting
+else
+  GITEA_LATEST_VERSION=$(curl -L -s https://dl.gitea.io/gitea/ | grep '<a href\=\"\/gitea' | cut -d"/" -f3 | grep -E '^[0-9]+\.[0-9]+\.[0-9]$' | cut -d '"' -f1 | grep '[[:digit:]]' | sort -V | tail -n 1)
+fi
 cd /tmp >> /dev/null 2>&1
 rm gitea gitea.sha256 >> /dev/null 2>&1
 # download signature
